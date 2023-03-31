@@ -11,13 +11,13 @@ class Alak:
 
     # generate a starting board with length n, and default pieces
     def generate_board(self):
-        self.board = 'xxxx__oxoo'
-        print("board starts with: " + self.board)
+        self.board = 'xxxx__oooo'
+        print("\nInitial board: " + self.board)
         return np.array(list(self.board))
 
     def pick_starting_piece(self):
         self.cur_piece = np.random.choice(['x', 'o'])
-        print("'" + self.cur_piece + "' starts the game:")
+        print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + " starts the game: ~~~~~~~~~~~~~~~~")
         return self.cur_piece
 
     # go through the board and return indices of all given slots
@@ -28,7 +28,7 @@ class Alak:
     # move the piece from src to dest, print the move and increase the step_counter
     def move_piece(self, src, dest):
         self.step_counter += 1
-        print("-> Step " + str(self.step_counter) + ": move '" + self.cur_piece + "' from position "
+        print("-> Step " + str(self.step_counter) + ": move " + self.cur_piece + " from position "
               + str(src) + " to position " + str(dest))
 
         arr = np.array(list(self.board))
@@ -41,14 +41,13 @@ class Alak:
         # current rule: randomly pick a spot of current piece
         # and move to a random empty spot
 
-
         # check prev dest create any captures (previous suicide move)
         if self.prev_dest != -1:
             # if self.cur_piece == 'o':
-            self.check_capture(self.prev_dest, self.cur_piece)
-            # else:
-            #     self.check_capture(self.prev_dest, self.find_opponent('o'))
-            print("board after capture: ", self.board)
+
+            print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + "'s turn: ~~~~~~~~~~~~~~~~")
+            self.check_capture_from_last_round(self.prev_dest, self.cur_piece)
+            print("clean board: ", self.board)
 
         list_of_empty_slots = self.find_all_specific_slots('_')
         list_of_cur_piece_slots = self.find_all_specific_slots(self.cur_piece)
@@ -58,7 +57,7 @@ class Alak:
 
         # randomly pick moves but later will model and predict the move
         src = np.random.choice(list_of_cur_piece_slots)
-        print("empty slots: ", list_of_empty_slots)
+        # print("empty slots: ", list_of_empty_slots)
         dest = np.random.choice(list_of_empty_slots)
 
         # move the piece to the dest
@@ -67,7 +66,7 @@ class Alak:
 
         # check capture in current board
         self.check_capture(dest, self.cur_piece)
-        print("board after captures: ", self.board)
+        print("board after capture: ", self.board)
         self.prev_dest = dest
 
 
@@ -79,6 +78,8 @@ class Alak:
         opp_piece = self.find_opponent(piece_to_check)
         left_capture_counter = 0
         right_capture_counter = 0
+        no_capture_flag_left = True
+        no_capture_flag_right = True
 
         # check to the left
         pos = dest
@@ -90,6 +91,7 @@ class Alak:
                 break
             elif self.board[pos] == self.cur_piece:
                 self.capture(dest, left_capture_counter, 'left')
+                no_capture_flag_left = False
                 break
             elif self.board[pos] == opp_piece: # find opposite, continue look fo more
                 left_capture_counter += 1
@@ -100,16 +102,27 @@ class Alak:
             pos += 1
             if self.board[pos] == '_':
                 right_capture_counter = 0  # nothing captured, continue the game
-                self.capture(dest, left_capture_counter, 'right')
+                self.capture(dest, right_capture_counter, 'right')
                 break
             elif self.board[pos] == self.cur_piece:
                 self.capture(dest, right_capture_counter, 'right')
+                no_capture_flag_right = False
                 break
             elif self.board[pos] == opp_piece:  # find opposite, continue look fo more
                 right_capture_counter += 1
 
+        if no_capture_flag_left:
+            left_capture_counter = 0
+        if no_capture_flag_right:
+            right_capture_counter = 0
+
+        if no_capture_flag_left or no_capture_flag_right:
+            print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter) + " pieces!")
+
+
     # discard pieces from the board based on the counter and direction
     def capture(self, start_from, capture_counter, direction):
+        num_piece_captured = capture_counter
         if capture_counter != 0:
             while capture_counter > 0:
                 if direction == 'left':
@@ -120,9 +133,44 @@ class Alak:
                     start_from += 1
                     capture_counter -= 1
                     self.board = self.board[0: start_from] + '_' + self.board[start_from + 1: len(self.board)]
-            print("board after capture:", self.board)
-        else:
-            print("No capture :( ")
+
+
+    def check_capture_from_last_round(self, dest, piece_to_check):
+        opp_piece = self.find_opponent(piece_to_check)
+        left_capture_counter = 0
+        right_capture_counter = 0
+
+        # check to the left
+        pos = dest
+        while pos > 0:
+            pos -= 1
+            if self.board[pos] == '_':
+                left_capture_counter = 0 # nothing captured, continue the game
+                break
+            elif self.board[pos] == self.cur_piece:
+                left_capture_counter += 1
+                break
+            elif self.board[pos] == opp_piece: # find opposite, continue look fo more
+                left_capture_counter += 1
+
+        # check to the right
+        pos = dest
+        while pos < len(board)-1:
+            pos += 1
+            if self.board[pos] == '_':
+                right_capture_counter = 0  # nothing captured, continue the game
+                break
+            elif self.board[pos] == self.cur_piece:
+                right_capture_counter += 1
+                break
+            elif self.board[pos] == opp_piece:  # find opposite, continue look fo more
+                right_capture_counter += 1
+
+        if left_capture_counter > 0 and right_capture_counter > 0: # capture in between
+            self.capture(dest+1, left_capture_counter, 'left')
+            self.capture(dest-1, right_capture_counter, 'right')
+            print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter - 1) + " pieces!")
+
 
     # # given a list of potential destinations, return the valid slots can be destinations without 'KO' condition
     # def clean_KO_slots(self, list_of_empty_spots):
@@ -146,7 +194,7 @@ class Alak:
         # game ends when only one side of the piece exists on board
         if len(set(self.board)) == 2:  # ended
             winner = [elem for elem in set(self.board) if elem != '_'][0]
-            print("GAME OVER!! Winner is '" + winner + "'")
+            print("\n!!!! GAME OVER!! Winner is '" + winner + "'")
             return winner
         else:  # not ended
             return '_'
@@ -169,19 +217,9 @@ if __name__ == '__main__':
     game = Alak()
     board = game.generate_board()
     starting_piece = game.pick_starting_piece()
-
     # check if game over
     while game.check_if_game_over() == '_':
-        print("")
-        print("***********************")
-
         game.update_board()
         game.switch_piece()
 
     sys.exit()
-
-    # made a move
-
-    # check board on any captures
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
