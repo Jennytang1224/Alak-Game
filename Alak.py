@@ -8,17 +8,29 @@ class Alak:
         self.prev_dest = -1
         self.cur_piece = ''
         self.step_counter = 0
+        self.user_piece = ''
+        self.computer_piece = ''
 
     # generate a starting board with length n, and default pieces
     def generate_board(self):
-        self.board = 'xxxx__oooo'
-        print("\nInitial board: " + self.board)
+        self.board = 'xxxxx____ooooo'
+        # print("\nInitial board: " + self.board)
+        self.print_board()
         return np.array(list(self.board))
 
     def pick_starting_piece(self):
-        self.cur_piece = np.random.choice(['x', 'o'])
+        # system automatically assign user a piece:
+        self.user_piece = np.random.choice(['x', 'o'])
+        if self.user_piece == 'x':  # user goes first
+            self.computer_piece = 'o'
+            print("Your side is 'x'")
+        else:
+            self.computer_piece = 'x'
+            print("Your side is 'o'")
+
+        self.cur_piece = 'x'  # x always goes first
         print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + " starts the game: ~~~~~~~~~~~~~~~~")
-        return self.cur_piece
+
 
     # go through the board and return indices of all given slots
     def find_all_specific_slots(self, slot):
@@ -38,36 +50,61 @@ class Alak:
 
     # given the current piece, go from the source(src) to the destination(dest)
     def update_board(self):
-        # current rule: randomly pick a spot of current piece
-        # and move to a random empty spot
-
-        # check prev dest create any captures (previous suicide move)
+        # check if prev dest create any captures (previous suicide move)
         if self.prev_dest != -1:
             # if self.cur_piece == 'o':
-
-            print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + "'s turn: ~~~~~~~~~~~~~~~~")
             self.check_capture_from_last_round(self.prev_dest, self.cur_piece)
-            print("clean board: ", self.board)
+            # print("clean board: ", self.board)
+            print("clean board:")
+            self.print_board()
 
-        list_of_empty_slots = self.find_all_specific_slots('_')
-        list_of_cur_piece_slots = self.find_all_specific_slots(self.cur_piece)
-        #
-        # # check if the empty slots are in 'KO' condition, if so, we shouldn't consider them as potential dest
-        # list_of_valid_empty_slots = self.clean_KO_slots(list_of_empty_slots)
+        print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + "'s turn: ~~~~~~~~~~~~~~~~")
 
-        # randomly pick moves but later will model and predict the move
-        src = np.random.choice(list_of_cur_piece_slots)
-        # print("empty slots: ", list_of_empty_slots)
-        dest = np.random.choice(list_of_empty_slots)
+        if self.user_piece == self.cur_piece: # use's turn: use input prompt
+            print("Please enter your move below:")
+            from_pos = input("Move from position:")
+            to_pos = input("To position:")
+            print("You are moving {} to {}".format(from_pos, to_pos))
+
+            while not from_pos.isnumeric() or not to_pos.isnumeric() \
+                or int(from_pos) > len(self.board)-1 or int(from_pos) < 0 \
+                or self.board[int(from_pos)] != self.user_piece \
+                or int(to_pos) > len(self.board) or int(to_pos) < 0 \
+                or self.board[int(to_pos)] != '_' \
+                or from_pos == to_pos:
+                print("This is an illegal move, please re-enter your move again:")
+                from_pos = input("Move from position:")
+                to_pos = input("To position:")
+                print("You are moving {} to {}".format(from_pos, to_pos))
+
+            src = int(from_pos)
+            dest = int(to_pos)
+
+        else:  # computer's turn:  randomly make move
+            list_of_empty_slots = self.find_all_specific_slots('_')
+            list_of_cur_piece_slots = self.find_all_specific_slots(self.cur_piece)
+            #
+            # # check if the empty slots are in 'KO' condition, if so, we shouldn't consider them as potential dest
+            # list_of_valid_empty_slots = self.clean_KO_slots(list_of_empty_slots)
+
+            # randomly pick moves but later will model and predict the move
+            src = np.random.choice(list_of_cur_piece_slots)
+            # print("empty slots: ", list_of_empty_slots)
+            dest = np.random.choice(list_of_empty_slots)
 
         # move the piece to the dest
         self.move_piece(src, dest)
-        print("board after move: ", self.board)
+        # print("board after move: ", self.board)
+        print("board after move:")
+        self.print_board()
 
         # check capture in current board
         self.check_capture(dest, self.cur_piece)
-        print("board after capture: ", self.board)
+        # print("board after capture: ", self.board)
+        print("board after capture:")
+        self.print_board()
         self.prev_dest = dest
+
 
 
 
@@ -169,7 +206,7 @@ class Alak:
         if left_capture_counter > 0 and right_capture_counter > 0: # capture in between
             self.capture(dest+1, left_capture_counter, 'left')
             self.capture(dest-1, right_capture_counter, 'right')
-            print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter - 1) + " pieces!")
+            print("Suicide move alert: " + self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter - 1) + " piece(s)!")
 
 
     # # given a list of potential destinations, return the valid slots can be destinations without 'KO' condition
@@ -211,12 +248,17 @@ class Alak:
         else:
             return 'o'
 
+    def print_board(self):
+        expanded_board = ' '.join(self.board)
+        print(expanded_board)
+        print("0 1 2 3 4 5 6 7 8 9 10111213")
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     game = Alak()
     board = game.generate_board()
-    starting_piece = game.pick_starting_piece()
+    game.pick_starting_piece()
     # check if game over
     while game.check_if_game_over() == '_':
         game.update_board()
