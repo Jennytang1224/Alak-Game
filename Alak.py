@@ -207,6 +207,8 @@ class Alak:
             self.capture(dest+1, left_capture_counter, 'left')
             self.capture(dest-1, right_capture_counter, 'right')
             print("Suicide move alert: " + self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter - 1) + " piece(s)!")
+            print("!!! Detected suicide move, have to start a new game! ")
+            exit(1)
 
 
     # # given a list of potential destinations, return the valid slots can be destinations without 'KO' condition
