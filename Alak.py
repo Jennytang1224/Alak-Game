@@ -3,7 +3,9 @@ import sys
 
 
 class Alak:
-    def __init__(self):
+    def __init__(self, interactive, random):
+        self.interactive = interactive
+        self.random = random
         self.board = ""
         self.prev_dest = -1
         self.cur_piece = ''
@@ -16,7 +18,7 @@ class Alak:
 
     # generate a starting board with length n, and default pieces
     def generate_board(self):
-        self.board = 'xxxxx____ooooo'
+        self.board = 'x_xxxo_x_ooo_o' #'xxxxx____ooooo'
         # print("\nInitial board: " + self.board)
         self.print_board()
         return np.array(list(self.board))
@@ -65,10 +67,12 @@ class Alak:
 
         print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + "'s turn: ~~~~~~~~~~~~~~~~")
 
-        if self.user_piece == self.cur_piece:  # use's turn: use input prompt
+        if self.interactive and self.user_piece == self.cur_piece:  # use's turn: use input prompt
             print("Please enter your move below:")
             from_pos = input("Move from position:")
             to_pos = input("To position:")
+            # from_pos = 7
+            # to_pos = 1
             print("You are moving {} to {}".format(from_pos, to_pos))
 
             while not from_pos.isnumeric() or not to_pos.isnumeric() \
@@ -152,7 +156,7 @@ class Alak:
 
         if no_capture_flag_left is False and no_capture_flag_right is False:
             print(self.cur_piece + " captured " + str(
-                left_capture_counter + right_capture_counter) + " pieces! => DOUBLE KILL")
+                left_capture_counter + right_capture_counter) + " piece(s)!")
 
         if no_capture_flag_left:
             left_capture_counter = 0
@@ -160,7 +164,7 @@ class Alak:
             right_capture_counter = 0
 
         if no_capture_flag_left or no_capture_flag_right:
-            print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter) + " pieces!")
+            print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter) + " piece(s)!")
 
     # discard pieces from the board based on the counter and direction
     def capture(self, start_from, capture_counter, direction):
@@ -193,6 +197,9 @@ class Alak:
                 break
             elif self.board[pos] == opp_piece:  # find opposite, continue look fo more
                 left_capture_counter += 1
+                if pos == 0:
+                    left_capture_counter = 0
+
 
         # check to the right
         pos = dest
@@ -206,6 +213,8 @@ class Alak:
                 break
             elif self.board[pos] == opp_piece:  # find opposite, continue look fo more
                 right_capture_counter += 1
+                if pos == len(board) - 1:
+                    right_capture_counter = 0
 
         if left_capture_counter > 0 and right_capture_counter > 0:  # capture in between
             self.capture(dest + 1, left_capture_counter, 'left')
@@ -264,7 +273,7 @@ class Alak:
     def print_board(self):
         expanded_board = ' '.join(self.board)
         print(expanded_board)
-        print("0 1 2 3 4 5 6 7 8 9 10111213\n")
+        print("0 1 2 3 4 5 6 7 8 9 a b c d\n")
 
     def embedding(self):  # x side + o side
         if len(self.round) < len(self.board) * 2:
@@ -291,7 +300,7 @@ class Alak:
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    game = Alak()
+    game = Alak(interactive = False, random = True)
     board = game.generate_board()
     game.pick_starting_piece()
     # check if game over
