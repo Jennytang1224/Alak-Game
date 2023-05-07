@@ -3,10 +3,10 @@ import numpy as np
 
 
 class Alak:
-    def __init__(self, interactive, random):
+    def __init__(self, board, interactive, random):
         self.interactive = interactive
         self.random = random
-        self.board = ""
+        self.board = board
         self.prev_dest = -1
         self.cur_piece = ''
         self.round_counter = 0
@@ -17,14 +17,14 @@ class Alak:
         self.round =[]
         self.is_suicide = False
         self.winner = ''
-
-
-    # generate a starting board with length n, and default pieces
-    def generate_board(self):
-        self.board = 'xxxxx____ooooo'
         print("\nInitial board: ")
         self.print_board()
-        return np.array(list(self.board))
+
+    # generate a starting board with length n, and default pieces
+    # def generate_board(self):
+    #     print("\nInitial board: ")
+    #     self.print_board()
+    #     return np.array(list(self.board))
 
     def pick_starting_piece(self):
         # system automatically assign user a piece:
@@ -61,15 +61,13 @@ class Alak:
         # check if prev dest create any captures (previous suicide move)
 
         if self.prev_dest != -1:
-            # if self.cur_piece == 'o':
-            self.check_capture_from_last_round(self.prev_dest, self.cur_piece)
+            self.check_suicide_capture(self.prev_dest, self.cur_piece)
             # print("clean board: ", self.board)
             print("clean board:")
             self.print_board()
             # save moves after embedding
             if not self.is_suicide:
                 self.embedding()
-
 
         print("\n~~~~~~~~~~~~~~~ " + self.cur_piece + "'s turn: ~~~~~~~~~~~~~~~~")
 
@@ -158,7 +156,7 @@ class Alak:
 
         # check to the right
         pos = dest
-        while pos < len(board) - 1:
+        while pos < len(self.board) - 1:
             pos += 1
             if self.board[pos] == '_':
                 right_capture_counter = 0  # nothing captured, continue the game
@@ -183,6 +181,8 @@ class Alak:
         if no_capture_flag_left or no_capture_flag_right:
             print(self.cur_piece + " captured " + str(left_capture_counter + right_capture_counter) + " piece(s)!")
 
+        self.print_board()
+
     # discard pieces from the board based on the counter and direction
     def capture(self, start_from, capture_counter, direction):
         num_piece_captured = capture_counter
@@ -197,7 +197,7 @@ class Alak:
                     capture_counter -= 1
                     self.board = self.board[0: start_from] + '_' + self.board[start_from + 1: len(self.board)]
 
-    def check_capture_from_last_round(self, dest, piece_to_check):
+    def check_suicide_capture(self, dest, piece_to_check):
         opp_piece = self.find_opponent(piece_to_check)
         left_capture_counter = 0
         right_capture_counter = 0
@@ -220,7 +220,7 @@ class Alak:
 
         # check to the right
         pos = dest
-        while pos < len(board) - 1:
+        while pos < len(self.board) - 1:
             pos += 1
             if self.board[pos] == '_':
                 right_capture_counter = 0  # nothing captured, continue the game
@@ -230,7 +230,7 @@ class Alak:
                 break
             elif self.board[pos] == opp_piece:  # find opposite, continue look fo more
                 right_capture_counter += 1
-                if pos == len(board) - 1:
+                if pos == len(self.board) - 1:
                     right_capture_counter = 0
 
         if left_capture_counter > 0 and right_capture_counter > 0:
@@ -328,52 +328,107 @@ class Alak:
         else:
             self.y = [0] * self.round_counter
 
+    def play(self):
+        X_data = np.array([[0] * len(self.board)*2])  # used for stacking all games, first row set as dummies, need to remove later
+        y_data = np.array([])
+        # j = 0
+        # user_win_stats = 0
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    X_data = np.array([[0]*28]) # used for stacking all games, first row set as dummies, need to remove later
-    y_data = np.array([])
-    j = 0
-    user_win_stats = 0
-
-    for i in range(1, 3):
-        game = Alak(interactive = False, random = True)
-        board = game.generate_board()
-        game.pick_starting_piece()
+        # for i in range(1, 100):
+            # game = Alak(my_board, interactive=False, random=True)
+        self.pick_starting_piece()
         # check if game over
-        while game.check_if_game_over() == '_' and len(game.round) != len(game.board)*2: #game.round != []:
-            game.update_board()
+        while self.check_if_game_over() == '_' and len(self.round) != len(self.board) * 2:  # game.round != []:
+            self.update_board()
             # record suicide games
-            if game.is_suicide: #and game.round == []:
-                j = j+1
-                print("********************* number of suicide games: " + str(j))
+            if self.is_suicide:  # and game.round == []:
+                # j = j + 1
+                # print("********************* number of suicide games: " + str(j))
                 break
-            game.switch_piece()
+            self.switch_piece()
 
         # calculate suicide stats
-        print("********************* number of non-suicide games: " + str(i-j))
-        print("****************************************** number of games played: " + str(i))
+        # print("********************* number of non-suicide games: " + str(i - j))
+        # print("****************************************** number of games played: " + str(i))
 
-        # calculate winning stats
-        if game.winner == game.user_piece:
-            user_win_stats = user_win_stats + 1
-        print("user wins:{:0.0f}% ({} game(s)) and computer wins:{:0.0f}% ({} game(s))".
-              format((user_win_stats/(i-j+.0001))*100, user_win_stats, (1-user_win_stats/(i-j+.0001))*100, i-j-user_win_stats))
+            # calculate winning stats
+            # if self.winner == self.user_piece:
+            #     user_win_stats = user_win_stats + 1
+            # print("user wins:{:0.0f}% ({} game(s)) and computer wins:{:0.0f}% ({} game(s))".
+            #       format((user_win_stats / (i - j + .0001)) * 100, user_win_stats,
+            #              (1 - user_win_stats / (i - j + .0001)) * 100, i - j - user_win_stats))
 
-        # show training data, label for the game
-        if not game.is_suicide: # after the game is done, if the game is not suicide
-            game.embedding()
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~ game.X shape: {}".format(np.array(game.X).shape))
-            # print("yyy:" + str(game.y))
-            # print("xxx:" + str(X_data))
-            X_data = np.vstack((X_data, np.array(game.X)))
+            # show training data, label for the game
+        if not self.is_suicide:  # after the game is done, if the game is not suicide
+            self.embedding()
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~ game.X shape: {}".format(np.array(self.X).shape))
+            X_data = np.vstack((X_data, np.array(self.X)))
             print("X_data shape: {}".format(X_data.shape))
-            y_data = np.append(y_data, game.y)
+            y_data = np.append(y_data, self.y)
 
-    # final training data, label
-    X_data = X_data[1:]
-    for l in X_data:
-        print('[' + str(l) + ']\n')
-    # print(y_data)
-    print(X_data.shape)
-    print(y_data.shape)
+        # final training data, label
+        X_data = X_data[1:]
+        for l in X_data:
+            print('[' + str(l) + ']\n')
+        # print(y_data)
+        print(X_data.shape)
+        print(y_data.shape)
+
+
+# play 1 game
+if __name__ == '__main__':
+    my_board = 'xo_oxxx_______'
+    game = Alak(my_board, interactive=True, random=True)
+    game.play()
+
+#
+# # Press the green button in the gutter to run the script.
+# if __name__ == '__main__':
+#
+#     X_data = np.array([[0]*28]) # used for stacking all games, first row set as dummies, need to remove later
+#     y_data = np.array([])
+#     j = 0
+#     user_win_stats = 0
+#
+#     for i in range(1, 100):
+#         my_board = 'xxxxx____ooooo'
+#         game = Alak(my_board, interactive = False, random = True)
+#         # board = game.generate_board()
+#         game.pick_starting_piece()
+#         # check if game over
+#         while game.check_if_game_over() == '_' and len(game.round) != len(game.board)*2: #game.round != []:
+#             game.update_board()
+#             # record suicide games
+#             if game.is_suicide: #and game.round == []:
+#                 j = j+1
+#                 print("********************* number of suicide games: " + str(j))
+#                 break
+#             game.switch_piece()
+#
+#         # calculate suicide stats
+#         print("********************* number of non-suicide games: " + str(i-j))
+#         print("****************************************** number of games played: " + str(i))
+#
+#         # calculate winning stats
+#         if game.winner == game.user_piece:
+#             user_win_stats = user_win_stats + 1
+#         print("user wins:{:0.0f}% ({} game(s)) and computer wins:{:0.0f}% ({} game(s))".
+#               format((user_win_stats/(i-j+.0001))*100, user_win_stats, (1-user_win_stats/(i-j+.0001))*100, i-j-user_win_stats))
+#
+#         # show training data, label for the game
+#         if not game.is_suicide: # after the game is done, if the game is not suicide
+#             game.embedding()
+#             print("~~~~~~~~~~~~~~~~~~~~~~~~~ game.X shape: {}".format(np.array(game.X).shape))
+#             # print("yyy:" + str(game.y))
+#             # print("xxx:" + str(X_data))
+#             X_data = np.vstack((X_data, np.array(game.X)))
+#             print("X_data shape: {}".format(X_data.shape))
+#             y_data = np.append(y_data, game.y)
+#
+#     # final training data, label
+#     X_data = X_data[1:]
+#     for l in X_data:
+#         print('[' + str(l) + ']\n')
+#     # print(y_data)
+#     print(X_data.shape)
+#     print(y_data.shape)
