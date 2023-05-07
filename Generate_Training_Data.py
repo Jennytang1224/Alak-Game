@@ -7,8 +7,7 @@ import numpy as np
 class Generate_Training_data:
 
     def generate_training_data(self, board, num_of_games):
-        X_data = np.array(
-            [[0] * (len(board) * 2)])  # used for stacking all games, first row set as dummies, need to remove later
+        X_data = np.array([[0] * (len(board) * 2)])  # used for stacking all games, first row set as dummies, need to remove later
         y_data = np.array([])
         j = 0
         user_win_stats = 0
@@ -45,8 +44,6 @@ class Generate_Training_data:
             if not game.is_suicide:  # after the game is done, if the game is not suicide
                 game.embedding()
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~ game.X shape: {}".format(np.array(game.X).shape))
-                # print("yyy:" + str(game.y))
-                # print("xxx:" + str(X_data))
                 X_data = np.vstack((X_data, np.array(game.X)))
                 print("X_data shape: {}".format(X_data.shape))
                 y_data = np.append(y_data, game.y)
@@ -75,7 +72,6 @@ if __name__ == "__main__":
 
     data.save_data(X_data, 'data/alak_data_may_6_v0.pickle', y_data, 'data/alak_label_may_6_v0.pickle')
 
-    # data, label = train.load_data()
 
 
 
