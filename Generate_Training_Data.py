@@ -1,3 +1,5 @@
+import pickle
+
 from Alak import Alak
 import numpy as np
 
@@ -56,11 +58,26 @@ class Generate_Training_data:
         # print(y_data)
         print(X_data.shape)
         print(y_data.shape)
+        return X_data, y_data
+
+    def save_data(self, X_data, X_fname, y_data, y_fname):
+        with open(X_fname, 'wb') as handle:
+            pickle.dump(X_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        with open(y_fname, 'wb') as handle:
+            pickle.dump(y_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        print("save data to file is completed")
 
 
 if __name__ == "__main__":
     my_board = 'xxxxx____ooooo'
-    train = Generate_Training_data()
-    train.generate_training_data(my_board, 1000)
+    data = Generate_Training_data()
+    X_data, y_data = data.generate_training_data(my_board, 10000)
+
+    data.save_data(X_data, 'data/alak_data_may_6_v0.pickle', y_data, 'data/alak_label_may_6_v0.pickle')
+
+    # data, label = train.load_data()
+
+
+
 
 
