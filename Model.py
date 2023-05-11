@@ -122,17 +122,6 @@ if __name__ == "__main__":
     model.run('sk', "models/alak_model_v4.pkl", X_train, y_train, X_val, y_val, X_test, y_test)
     # model.run('tf', "models/alak_model_v4.h5", X_train, y_train, X_val, y_val, X_test, y_test)
 
-
-    # # create model
-    # # tf_model, history = model.create_tfmodel(X_train, y_train, X_val, y_val, checkpoint_path, checkpoint_dir)
-    # # model.save_model(tf_model, "models/alak_model_v4.h5")
-    # # #
-    # sk_model = model.create_skmodel(X_train, y_train, X_val, y_val)
-    # model.save_model(sk_model, "models/alak_model_v4.pkl")
-    # model.evaluate_model(sk_model, 'sk', X_test, y_test)
-    #
-    #
-    #
     # # Evaluate the model
     # # loss_untrain, acc_untrain = model.evaluate_model(tf_model, X_test, y_test)
     # # print("Using Untrained model, accuracy: {:5.2f}%".format(100 * acc_untrain))
@@ -140,13 +129,6 @@ if __name__ == "__main__":
     # # tf_model.load_weights(checkpoint_path) # Loads trained weights
     # # loss_train, acc_train = model.evaluate_model(tf_model, X_test, y_test)
     # # print("Using trained weights, accuracy: {:5.2f}%".format(100 * acc_train))
-    # #
-    # # model.evaluate_model(tf_model, 'tf', X_train, y_train)
-    # #
-    # # model.evaluate_model(tf_model, 'tf', X_val, y_val)
-    # #
-    # # model.evaluate_model(tf_model, 'tf', X_test, y_test)
-    # #
 
 
 
