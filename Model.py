@@ -61,14 +61,16 @@ class Model:
         # Train a NN classification model
         print("Fitting the classifier to the training set")
         t0 = time.time()
-        mlp_clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(256, 100), activation='tanh',\
-                            random_state=42, max_iter=100, learning_rate_init=0.1)
+        # clf = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(100, 10), activation='relu',\
+        #                      max_iter=200, learning_rate_init=0.01)
 
-        parameters = {'learning_rate_init': [0.001, 0.01, 0.1, 0.5],\
-                      'hidden_layer_sizes': [(100, 256, 100), (100, 500, 200), (100, 20)],\
-                      'max_iter': [100, 1000]}
+        clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=[100, ], max_iter=int(11), activation='relu')
 
-        clf = GridSearchCV(mlp_clf, parameters)
+        # parameters = {'learning_rate_init': [0.001, 0.01, 0.1, 0.5],\
+        #               'hidden_layer_sizes': [(100, 256, 100), (100, 500, 200), (100, 20)],\
+        #               'max_iter': [100, 1000]}
+        #
+        # clf = GridSearchCV(mlp_clf, parameters)
         clf.fit(X_train, y_train)
 
         print("Training done in {:0.3f}s".format(time.time() - t0))
@@ -77,6 +79,7 @@ class Model:
         # y_pred = clf.predict(X_val)
         print("Validation done in {:0.3f}s".format(time.time() - t0))
         print("Test score: {:.4f}".format(clf.score(X_val, y_val)))
+
         return clf
 
     def save_model(self, model, model_fname):
@@ -112,15 +115,15 @@ class Model:
 
 if __name__ == "__main__":
     model = Model()
-    X_train, y_train = model.load_data('data/alak_data_may_11_v0.pickle', 'data/alak_label_may_11_v0.pickle')
-    X_val, y_val = model.load_data('data/alak_data_may_11_v1.pickle', 'data/alak_label_may_11_v1.pickle')
-    X_test, y_test = model.load_data('data/alak_data_may_11_v2.pickle', 'data/alak_label_may_11_v2.pickle')
+    X_train, y_train = model.load_data('data/alak_data_may_11_v2_train.pickle', 'data/alak_label_may_11_v2_train.pickle')
+    X_val, y_val = model.load_data('data/alak_data_may_11_v2_val.pickle', 'data/alak_label_may_11_v2_val.pickle')
+    X_test, y_test = model.load_data('data/alak_data_may_11_v2_test.pickle', 'data/alak_label_may_11_v2_test.pickle')
 
     checkpoint_path = "training/cp.ckpt"
     checkpoint_dir = os.path.dirname(checkpoint_path)
 
-    model.run('sk', "models/alak_model_v4.pkl", X_train, y_train, X_val, y_val, X_test, y_test)
-    # model.run('tf', "models/alak_model_v4.h5", X_train, y_train, X_val, y_val, X_test, y_test)
+    # model.run('sk', "models/alak_model_v10.pkl", X_train, y_train, X_val, y_val, X_test, y_test)
+    model.run('tf', "models/alak_model_v10.h5", X_train, y_train, X_val, y_val, X_test, y_test)
 
     # # Evaluate the model
     # # loss_untrain, acc_untrain = model.evaluate_model(tf_model, X_test, y_test)

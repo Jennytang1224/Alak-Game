@@ -3,6 +3,7 @@ import pickle
 from Alak import Alak
 import numpy as np
 
+from Prediction import Prediction
 
 class Generate_Training_data:
 
@@ -14,9 +15,12 @@ class Generate_Training_data:
         user_win_stats = 0
         num_user_starts = 0
         num_computer_starts = 0
+        predict = Prediction()
+        loaded_model = predict.load_model
+        model, type = loaded_model('models/alak_model_v10.h5', 'tf')
 
         for i in range(1, num_of_games + 1):
-            game = Alak(board, interactive=False, random=True, random_start=True, training=True)
+            game = Alak(board, model, type, user_first=True, interactive=False, random=False, random_start=True, training=False)
             game.pick_starting_piece()
             if game.user_piece == 'x':
                 num_user_starts = num_user_starts + 1
@@ -73,7 +77,11 @@ class Generate_Training_data:
 if __name__ == "__main__":
     my_board = 'xxxxx____ooooo'
     data = Generate_Training_data()
-    X_data, y_data = data.generate_training_data(my_board, 1000)
-
-    # save training data and lable:
-    data.save_data(X_data, 'data/alak_data_may_11_v2.pickle', y_data, 'data/alak_label_may_11_v2.pickle')
+    X_data, y_data = data.generate_training_data(my_board, 100)
+    # data.save_data(X_data, 'data/alak_data_may_11_v2_train.pickle', y_data, 'data/alak_label_may_11_v2_train.pickle')
+    #
+    # X_data, y_data = data.generate_training_data(my_board, 2000)
+    # data.save_data(X_data, 'data/alak_data_may_11_v2_test.pickle', y_data, 'data/alak_label_may_11_v2_test.pickle')
+    #
+    # X_data, y_data = data.generate_training_data(my_board, 2000)
+    # data.save_data(X_data, 'data/alak_data_may_11_v2_val.pickle', y_data, 'data/alak_label_may_11_v2_val.pickle')
