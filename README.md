@@ -1,9 +1,3 @@
-
-# Project Title
-
-A brief description of what this project does and who it's for
-
-
 # Artificial Neural Network Alak Player
 
 The purpose of this project is to build an artificial neural network (ANN) algorithm to play the
@@ -85,11 +79,11 @@ Inside the Alak(), the parameters are:
 1. In my training data, I only allow user suicide, model suicide will trigger the whole game get discarded, and won't appear in the training data
 2. I also detect any illigal move from user input: 
 
-        • out of range
-        • not from 0-9 or a-d
-        • move from and move to are the same slots
-        • try to move opponent's piece
-        • move from or move to slots have other pieces on them
+• out of range
+• not from 0-9 or a-d
+• move from and move to are the same slots
+• try to move opponent's piece
+• move from or move to slots have other pieces on them
 3. When training ended, it will show the stats: 
 example:
 
@@ -113,9 +107,9 @@ example:
 ## Test:
 In Test.py, I tested:
 
-        • simple kill involving different numbers of pieces being removed
-        • double kill
-        • double kill that involves more than one piece
+• simple kill involving different numbers of pieces being removed
+• double kill
+• double kill that involves more than one piece
 
 
 
