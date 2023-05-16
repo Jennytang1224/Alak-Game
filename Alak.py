@@ -263,15 +263,12 @@ class Alak:
             self.capture(dest + 1, left_capture_counter, 'left')
             self.capture(dest - 1, right_capture_counter, 'right')
 
-            # only allow USER suicide, MODEL suicide wont be in the training data
-            if self.cur_piece == self.user_piece and self.training:
-            # # only allow USER suicide, MODEL suicide wont be in the training data
-            # if self.cur_piece == self.user_piece and self.training:
-            # if self.training:
-                print("suicide move alert: " + self.cur_piece + " captured " + str(
-                    left_capture_counter + right_capture_counter - 1) + " piece(s)!")
-                print("!!! Detected suicide move, have to start a new game! ")
-                self.is_suicide = True
+        ## only allow user suicide, model suicide won't be in the training data
+        if self.cur_piece == self.computer_piece and self.training:
+            print("suicide move alert: " + self.cur_piece + " captured " + str(
+                left_capture_counter + right_capture_counter - 1) + " piece(s)!")
+            print("!!! Detected suicide move, have to start a new game! ")
+            self.is_suicide = True
 
     # check if the game ends with a winner
     def check_if_game_over(self):
@@ -366,7 +363,7 @@ if __name__ == '__main__':
     my_board = 'xxxxx____ooooo'
     predict = Prediction()
     loaded_model = predict.load_model
-    model, type = loaded_model('models/alak_model_v10.h5', 'tf')
-    game = Alak(my_board, model, type, user_first=False, interactive=True, random=False, random_start=False, training=False)
+    model, type = loaded_model('models/alak_model_v14(85%).h5', 'tf')
+    game = Alak(my_board, model, type, user_first=False, interactive=True, random=False, random_start=True, training=False)
 
     game.play_1_game()
