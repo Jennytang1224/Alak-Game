@@ -5,7 +5,7 @@
 The purpose of this project is to build an artificial neural network (ANN) algorithm to play the
 one-dimensional version of the ancient board game Go, or Alak.
 
-What i Alak: https://senseis.xmp.net/?Alak
+What is Alak: https://senseis.xmp.net/?Alak
 
 ## Project Steps Overview:
 
