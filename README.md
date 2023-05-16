@@ -1,24 +1,18 @@
-# Artificial Neural Network Alak Player
+# Artificial Neural Network Alak Player 
+
+(Inspired by AlphaGo https://www.deepmind.com/research/highlighted-research/alphago)
 
 The purpose of this project is to build an artificial neural network (ANN) algorithm to play the
 one-dimensional version of the ancient board game Go, or Alak.
-Alak: https://senseis.xmp.net/?Alak
+
+What i Alak: https://senseis.xmp.net/?Alak
 
 ## Project Steps Overview:
+
 1. Based on the rules of the game, simulate the game so the game can play random games interactive or non-interactively (Alak.py)
 2. Use program generated randomly played games as training data: (Generate_Training_Data.py)
-        
-   1). attributes: 
-
-   save each round of the board and concatenate both user and computer's side of the board after their move, then use embedding to convert the boards only contains 1, 0, -1: 1(user's piece), 0(empty), -1(opponent's piece)
-
-   2). target: 
-
-   a list of 1 or -1, if user won the whole game, for each round of the game, the corresponding labels these rounds will be 1, otherwise -1 (this way is to optimize the final win or lose, rather than amount of kills in each round)
-   
 3. Create either TensorFlow NN model or Sklearn MLPClassifier model, save models (Models.py)
 4. To test model: Load models and use it to play against 100 random games to see the winning rate. model wins > 60 % means the model has certain level of intelligence. My final model's winning rate against 100 random games is ~85%.
-
 
 
 ## Rules to play the game:
@@ -126,7 +120,18 @@ in Generate_Traing_Data:
 
 • move from or move to slots have other pieces on them
 
-3. When training ended, it will show the stats: 
+3. training data: I saved all the rounds (each round consists of two moves, one by each side) of the simulated game in a pickle file; I also have save all labels:
+
+   1). attributes: 
+
+   save each round of the board and concatenate both user and computer's side of the board after their move, then use embedding to convert the boards only contains 1, 0, -1: 1(user's piece), 0(empty), -1(opponent's piece)
+
+   2). target: 
+
+   a list of 1 or -1, if user won the whole game, for each round of the game, the corresponding labels these rounds will be 1, otherwise -1 (this way is to optimize the final win or lose, rather than amount of kills in each round)
+   
+
+4. When training ended, it will show the stats: 
 example:
 
         !!!! GAME OVER!! Winner is 'x' 
@@ -137,14 +142,15 @@ example:
         computer starts:  52 times
 
 ## Models:
-1. You can call either TensorFlow NN model or Sklearn MLPClassifier model
-3. After the model was trained, I save all the rounds (each round consists of two moves, one by each side) of the simulated game in a pickle file if using sklearn, or h5 if using TensorFlow.
+1. You can call either TensorFlow NN model or Sklearn MLPClassifier model, my best model was using TensorFlow.
+2. Evaluation metric: 
+3. After the model was trained, I save models in a pickle file if using sklearn, or h5 if using TensorFlow.
 
 ## Prediction:
 1. load model
 2. generate all successor boards from the previous move
 3. feed the successor boards in to trained model, and model outputs the probability of winning corresponding to each successor board.
-4. in the prediction stage, check if the highest probability suggests a suicide move. If so, I checked the next highest probability move; repeat until a non-suicide move is selected. 
+4. check if the highest probability suggests a suicide move. If so, I checked the next highest probability move; repeat until a non-suicide move is selected. 
 
 ## Test:
 In Test.py, I tested:
@@ -154,6 +160,8 @@ In Test.py, I tested:
 • double kill
 
 • double kill that involves more than one piece
+
+• suicide moves 
 
 ## Future work:
 1. To optimize the number of pieces killed by the move, I may try using a
