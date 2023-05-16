@@ -8,10 +8,14 @@ Alak: https://senseis.xmp.net/?Alak
 1. Based on the rules of the game, simulate the game so the game can play random games interactive or non-interactively (Alak.py)
 2. Use program generated randomly played games as training data: (Generate_Training_Data.py)
         
-        1). attributes: 
-            save each round of the board and concatenate both user and computer's side of the board after their move, then use embedding to convert the boards only contains 1, 0, -1: 1(user's piece), 0(empty), -1(opponent's piece)
-        2). target: 
-            a list of 1 or -1, if user won the whole game, for each round of the game, the corresponding labels these rounds will be 1, otherwise -1 (this way is to optimize the final win or lose, rather than amount of kills in each round)
+   1). attributes: 
+
+   save each round of the board and concatenate both user and computer's side of the board after their move, then use embedding to convert the boards only contains 1, 0, -1: 1(user's piece), 0(empty), -1(opponent's piece)
+
+   2). target: 
+
+   a list of 1 or -1, if user won the whole game, for each round of the game, the corresponding labels these rounds will be 1, otherwise -1 (this way is to optimize the final win or lose, rather than amount of kills in each round)
+   
 3. Create either TensorFlow NN model or Sklearn MLPClassifier model, save models (Models.py)
 4. To test model: Load models and use it to play against 100 random games to see the winning rate. model wins > 60 % means the model has certain level of intelligence. My final model's winning rate against 100 random games is ~85%.
 
@@ -113,10 +117,15 @@ in Generate_Traing_Data:
 2. I also detect any illigal move from user input: 
 
 • out of range
+
 • not from 0-9 or a-d
+
 • move from and move to are the same slots
+
 • try to move opponent's piece
+
 • move from or move to slots have other pieces on them
+
 3. When training ended, it will show the stats: 
 example:
 
@@ -141,11 +150,10 @@ example:
 In Test.py, I tested:
 
 • simple kill involving different numbers of pieces being removed
+
 • double kill
+
 • double kill that involves more than one piece
-
-
-
 
 ## Future work:
 1. To optimize the number of pieces killed by the move, I may try using a
