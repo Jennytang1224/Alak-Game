@@ -110,15 +110,15 @@ in Generate_Traing_Data:
 1. In my training data, I only allow user suicide, model suicide will trigger the whole game get discarded, and won't appear in the training data
 2. I also detect any illigal move from user input: 
 
-• out of range
+- out of range
 
-• not from 0-9 or a-d
+- not from 0-9 or a-d
 
-• move from and move to are the same slots
+- move from and move to are the same slots
 
-• try to move opponent's piece
+- try to move opponent's piece
 
-• move from or move to slots have other pieces on them
+- move from or move to slots have other pieces on them
 
 3. training data: I saved all the rounds (each round consists of two moves, one by each side) of the simulated game in a pickle file; I also have save all labels:
 
@@ -155,13 +155,13 @@ example:
 ## Test:
 In Test.py, I tested:
 
-• simple kill involving different numbers of pieces being removed
+- simple kill involving different numbers of pieces being removed
 
-• double kill
+- double kill
 
-• double kill that involves more than one piece
+- double kill that involves more than one piece
 
-• suicide moves 
+- suicide moves 
 
 ## Future work:
 1. To optimize the number of pieces killed by the move, I may try using a
