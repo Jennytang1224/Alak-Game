@@ -2,7 +2,7 @@ import pickle
 
 import tensorflow as tf
 import numpy as np
-
+import heapq
 
 class Prediction:
 
@@ -49,51 +49,46 @@ class Prediction:
             row = np.concatenate((embedded_board, embedded_successor), axis=0)
             X_data = np.vstack((X_data, row))
         X_data = X_data[1:]
+
         if type == 'sk':
             y_pred_prob = model.predict_proba(X_data)
-            print(y_pred_prob)
         else: # 'tf'
             y_pred_prob = model.predict(X_data)
-            print(y_pred_prob)
 
-        idx = np.argmax(np.array(y_pred_prob), axis=0)
-        print(successor_boards.values())
-        print("idx:", str(idx))
-
+        best_idx, best_move_prob, best_move = -1, 0, (0, 0)
         if type == 'sk': # for sklearn model
-            best_move_prob = y_pred_prob[idx[1]]
-            best_move = list(successor_boards.values())[idx[0]]
-            print("best_move is from {} to {} and best_move_prob:{}"
-                  .format(best_move[0], best_move[1], best_move_prob[0]))
-            # if model generate suicide move, find the next best move with highest prob
-            if self.is_suicide_move(best_move[0], best_move[1], cur_piece, board):
-                print("update best move")
-                temp = y_pred_prob.tolist()
-                print(temp)
-                temp.pop(idx[0])
-                print(temp)
-                temp_board = list(successor_boards.values())
-                del temp_board[idx[0]]
-                print(temp_board)
-                idx = np.argmax(np.array(temp), axis=0)
-                print(idx)
-                best_move_prob = temp[idx[0]]
-                best_move = temp_board[idx[0]]
+            temp = y_pred_prob.tolist()
+            flatten_temp = []
+            for sublist in temp:
+                flatten_temp.append(sublist[0])
+
+            # find top n best index with highest probs
+            nlargest = heapq.nlargest(5, range(len(flatten_temp)), key=flatten_temp.__getitem__)
+
+            for idx in nlargest:
+                best_move_prob = flatten_temp[idx]
+                best_move = list(successor_boards.values())[idx]
+                if self.is_suicide_move(best_move[0], best_move[1], cur_piece, board):
+                    print("update best move")
+                    continue
+                else:
+                    break
 
         else: # for tensorflow model, idx is a tuple
-            best_move_prob = y_pred_prob[idx[0]]
-            best_move = list(successor_boards.values())[idx[0]]
+            temp = y_pred_prob.tolist()
+            flatten_temp = [num for sublist in temp for num in sublist]
 
-            #  if model generate suicide move, find the next best move with highest prob
-            if self.is_suicide_move(best_move[0], best_move[1], cur_piece, board):
-                print("update best move")
-                temp = y_pred_prob
-                temp = np.delete(temp, idx)
-                temp_board = list(successor_boards.values())
-                del temp_board[idx[0]]
-                idx = np.argmax(np.array(temp), axis=0)
-                best_move_prob = temp[idx]
-                best_move = temp_board[idx]
+            # find top n best index with highest probs
+            nlargest = heapq.nlargest(5, range(len(flatten_temp)), key=flatten_temp.__getitem__)
+
+            for idx in nlargest:
+                best_move_prob = flatten_temp[idx]
+                best_move = list(successor_boards.values())[idx]
+                if self.is_suicide_move(best_move[0], best_move[1], cur_piece, board):
+                    print("update best move")
+                    continue
+                else:
+                    break
 
         print("best_move is from {} to {} and best_move_prob:{}"
               .format(best_move[0], best_move[1], best_move_prob))
@@ -157,19 +152,13 @@ class Prediction:
             elif board[pos] == opp_piece:  # find opposite, continue look fo more
                 is_suicide = True
                 return is_suicide
-
         return is_suicide
 
-
-
-
-
+# test
 if __name__ == '__main__':
     p = Prediction()
-    model, type = p.load_model('models/alak_model_v10.h5', 'tf')
-    board = 'oooxx_xxoxx_x_'
-    piece = 'o'
+    model, type = p.load_model('models/alak_model_v11.pkl', 'sk')
+    board = '_o_o_o_o___xxx'
+    piece = 'x'
     successors = p.generate_successor(board, piece)
     optimal_move, optimal_move_probability = p.predict(successors, model, board, type, piece)
-    print("best_move is from {} to {} and best_move_prob:{}"
-          .format(optimal_move[0], optimal_move[1], optimal_move_probability[0]))
